@@ -7,13 +7,17 @@ while True:
     if user_input == "退出":
         print("Agent:再见")
         break
-    elif user_input =="计算":
-        a=float(input("第一个数字："))
-        op=input("运算符：")
-        b = float(input("第二个数字："))
+    elif "计算" in user_input:
+        expression=user_input.replace("帮我计算","").strip()
+        for op in["+","-","*"]:
+            if op in expression:
+                a_text,b_text=expression.split(op)
+                a=float(a_text)
+                b =float(b_text)
 
-        result=calculator(a,b,op)
-        print("Agent:",result)
+                result=calculator(a,b,op)
+                print("Agent:",result)
+                break
 
     else:
         print("Agent:我收到你的任务了："+user_input)
