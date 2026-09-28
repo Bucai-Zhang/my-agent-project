@@ -11,13 +11,26 @@ client = OpenAI(
     base_url=BASE_URL
 )
 
+tool_map={
+    "calculator":calculator,
+    "text_length":text_length
+}
+
+conversation_history=[]
+
+
+
+
+
+
 def run_agent(user_input):
-    history=[
+    working_history=conversation_history.copy()
+    working_history.append(
         {
             "role": "user",
             "content": user_input
         }
-    ]
+    )
 
     while True:
 
@@ -25,30 +38,27 @@ def run_agent(user_input):
 
         response = client.responses.create(
           model="deepseek-flash",
-          input=history,
+          input=working_history,
           tools=tools
         )
 
-        history.extend(response.output)
+        working_history.extend(response.output)
 
         for item in response.output:
           if item.type == "function_call":
               tool_called=True
 
               arguments = json.loads(item.arguments)
-              if item.name == "calculator":
-                  result = calculator(
-                    arguments["a"],
-                    arguments["b"],
-                    arguments["op"]
-                  )
 
-              elif item.name == "text_length":
-                  result=text_length(
-                      arguments["text"]
-                  )
 
-              history.append(
+              tool=tool_map.get(item.name)
+              if tool is not None:
+                  result=tool(**arguments)
+              else:
+                  result=f"未找到工具:{item.name}"
+
+
+              working_history.append(
                   {
                     "type": "function_call_output",
                     "call_id": item.call_id,  #告诉模型是哪次工具调用的结果
@@ -57,7 +67,20 @@ def run_agent(user_input):
               )
         if tool_called:
             continue
-        return response.output_text
 
+        answer = response.output_text
+        conversation_history.append(
+            {
+                "role": "user",
+                "content": user_input
+            }
+        )
+        conversation_history.append(
+            {
+                "role": "assistant",
+                "content":answer
+            }
+        )
+        return answer
 
 
