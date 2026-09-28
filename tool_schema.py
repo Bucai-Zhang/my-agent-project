@@ -1,3 +1,5 @@
+# 模型来认识工具
+
 tools = [
     {
         "type":"function",
@@ -19,6 +21,22 @@ tools = [
                     }
                 },
                 "required": ["a", "b", "op"]
+            }
+    },
+
+    {
+        "type":"function",
+        "name":"text_length",
+        "description":"计算一段文本的字符长度",
+        "parameters":
+            {
+                "type":"object",
+                "properties":{
+                    "text":{
+                        "type":"string"
+                    }
+                },
+                "required": ["text"]
             }
     }
 ]
