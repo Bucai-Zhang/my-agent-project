@@ -18,13 +18,57 @@ tool_map={
 
 conversation_history=[]
 
+memory_summary=""
+summarized_count=0
 
 
 
 
 
 def run_agent(user_input):
-    working_history=conversation_history.copy()
+    global memory_summary, summarized_count
+
+    cutoff=len(conversation_history)-6
+    if cutoff>summarized_count:
+        new_old_history=conversation_history[summarized_count:cutoff]
+
+        summary_response=client.responses.create(
+            model="deepseek-flash",
+            input=[
+                {
+                    "role":"user",
+                    "content": f"""
+                     这是之前已有的对话摘要：
+                     {memory_summary}
+
+                     这是新变成旧记录的对话：
+                     {new_old_history}
+
+                     请把两部分合并成一个简洁的历史摘要，保留以后对话可能有用的重要信息。
+"""
+                }
+            ]
+        )
+        memory_summary=summary_response.output_text
+        summarized_count=cutoff
+
+        print("当前摘要：", memory_summary)
+        print("已总结消息数：", summarized_count)
+
+
+    working_history=[]
+    if memory_summary:
+
+        working_history.append(
+           {
+            "role": "system",
+            "content": f"以下是之前对话的重要历史摘要：\n{memory_summary}"
+           }
+        )
+    working_history.extend(
+        conversation_history[-6:]
+    )
+
     working_history.append(
         {
             "role": "user",
