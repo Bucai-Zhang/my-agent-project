@@ -3,7 +3,7 @@ import json
 from openai import OpenAI
 
 from config import API_KEY, BASE_URL
-from tools import calculator,text_length
+from tools import calculator,text_length,read_file,list_files
 from tool_schema import tools
 
 client = OpenAI(
@@ -13,7 +13,9 @@ client = OpenAI(
 
 tool_map={
     "calculator":calculator,
-    "text_length":text_length
+    "text_length":text_length,
+    "read_file":read_file,
+    "list_files":list_files
 }
 
 conversation_history=[]
@@ -79,6 +81,8 @@ def build_working_history(user_input):
 
 
 def execute_tool_call(item):
+    print(f"当前调用工具：{item.name}")
+    print(f"当前调用参数：{item.arguments}")
     arguments = json.loads(item.arguments)
 
     tool = tool_map.get(item.name)
