@@ -70,6 +70,25 @@ tools = [
                 },
                 "required": ["path"]
             }
+    },
+
+    {
+        "type": "function",
+        "name": "search_file",
+        "description": "从指定目录开始递归搜索指定文件名，并返回找到的文件路径",
+        "parameters":
+            {
+                "type": "object",
+                "properties": {
+                    "filename": {
+                        "type": "string"
+                    },
+                    "root":{
+                        "type":"string"
+                    }
+                },
+                "required": ["filename"]
+            }
     }
 ]
 

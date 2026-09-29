@@ -3,7 +3,7 @@ import json
 from openai import OpenAI
 
 from config import API_KEY, BASE_URL
-from tools import calculator,text_length,read_file,list_files
+from tools import calculator,text_length,read_file,list_files,search_file
 from tool_schema import tools
 
 client = OpenAI(
@@ -15,8 +15,21 @@ tool_map={
     "calculator":calculator,
     "text_length":text_length,
     "read_file":read_file,
-    "list_files":list_files
+    "list_files":list_files,
+    "search_file":search_file
 }
+#加入系统工具使用策略
+SYSTEM_PROMPT = """
+你是一个可以调用工具完成任务的 Agent。
+
+文件工具使用规则：
+1. 如果用户已经提供明确文件路径，直接使用 read_file。
+2. 如果用户知道文件名但不知道具体路径，优先使用 search_file。
+3. search_file 已经成功返回路径后，直接使用 read_file，不需要再调用 list_files 验证。
+4. list_files 主要用于用户要求查看某个目录中有哪些文件时。
+"""
+
+
 
 conversation_history=[]
 
@@ -58,7 +71,13 @@ def update_memory_summary():
 
 def build_working_history(user_input):
 
-    working_history = []
+    working_history = [
+        {
+            "role": "system",
+            "content": SYSTEM_PROMPT
+        }
+    ]
+
     if memory_summary:
         working_history.append(
             {
