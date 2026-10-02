@@ -98,6 +98,29 @@ def build_working_history(user_input):
     return working_history
 
 
+def generate_rag_answer(query,context):
+    response=client.responses.create(
+        model="deepseek-flash",
+        input=[
+            {
+                "role": "system",
+                "content":"请根据提供的参考资料回答问题。如果资料中没有答案，就明确说资料中没有相关信息。"
+            },
+            {
+                "role": "user",
+                "content":f"""
+                参考资料:{context}
+                
+                问题:{query}
+             """
+            }
+        ]
+    )
+    return response.output_text
+
+
+
+
 
 def execute_tool_call(item):
     print(f"当前调用工具：{item.name}")
